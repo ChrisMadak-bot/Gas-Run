@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gas Run">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACoklEQVR4nO3dwU0bURRAURxlTQW0QwssKICiKIG6KCQLpAhFuWAQ4/+fdc6WzZO5vBnPmPHp9vH+Bv7n1+oB2Jc4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIg/V49wNe8Pr+sHuFfd08Pq0c4ymnKQ2o3zOK9q0xkxmFl8zJuJkz4DQPimPK6T5nzfLvHMesVnzXtp3aPg4W2jmPiH+LEmcvWcbCWOEjiIImDJA7SsHsr7y28Yn1Nb0k+YHOQxEESB0kcJHEc4jrOWMXx897KeH1+mZ6IOI41ug9xHG7uChHHhUxMRBwXNasPcVzaoBUijjVGJCKOlTbvQxw/7+7p4fw7xjuvEHEc5QoSEcexvvShk936EMfh5q4QcVzI+Yns8z/Z4riofX7x5xj8GdKh3vr44Njx90fLS7I51vjSicgq4lhp8z7EsdjOfYiDJA6SOEjiIImDJA6SOEiDL5/vc/fyWtkcJHGQxEESB0kcJHGQxEESB0kcJHGQxEESB0kcJHGQxEESB0kcJHGQxEESB0kcJHGQxEESB0kcJHGQxEESB0kcJHGQxEESB0kcJHGQxEESB2nwA+MmmvWQO5uDJA6SOEjiIDkh3ctWX9xkc5DEQXJYuaitjhqfsjlI4iCJgyQOkjhI4iBtHcesN35vJs5cTreP96tnGPYph28b183Wm4O1xEESB0kcJHGQxEESB0kcJHGQxEHa4vI5e7I5SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDtIfPBRrLy5KsfAAAAAASUVORK5CYII=">
+<title>Gas Run</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF0EB; --surface:#FFFFFF; --ink:#1B2420; --muted:#5D6862; --line:#D3D8D1;
+  --sign:#0E5A45; --sign-ink:#F2F4EF; --wait:#B86A00; --wait-ink:#FFF8EC; --kroger:#1F4FA8; --costco:#C8102E; --other:#6B7B73;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121614; --surface:#1B201D; --ink:#E7ECE8; --muted:#97A39C; --line:#2C3430;
+  --sign:#127356; --wait:#C47A10; --kroger:#7BA3F0; --costco:#FF6B7F; --other:#9FB0A7; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#121614; --surface:#1B201D; --ink:#E7ECE8; --muted:#97A39C; --line:#2C3430;
+  --sign:#127356; --wait:#C47A10; --kroger:#7BA3F0; --costco:#FF6B7F; --other:#9FB0A7; color-scheme:dark;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 Overpass,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:480px;margin:0 auto;padding:16px 16px 40px}
+button,input{font:inherit}
+:focus-visible{outline:3px solid var(--sign);outline-offset:2px}
+
+.controls{display:flex;gap:8px;margin-bottom:6px}
+.seg{display:flex;flex:1;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{flex:1;border:0;background:none;color:var(--muted);padding:7px 6px;border-radius:999px;font-weight:600;font-size:14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.auto{font-size:13px;color:var(--muted);margin:2px 2px 14px;min-height:18px}
+
+.verdict{background:var(--sign);color:var(--sign-ink);border-radius:14px;padding:20px 20px 18px}
+.verdict.wait{background:var(--wait);color:var(--wait-ink)}
+.verdict.empty{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.verdict .trip{font-size:14px;opacity:.85;margin:0 0 6px}
+.verdict h1{font-size:28px;line-height:1.1;font-weight:800;margin:0 0 10px;letter-spacing:-.01em}
+.verdict .price{font-size:60px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin:4px 0 8px}
+.verdict .price small{font-size:18px;font-weight:600;margin-left:4px;letter-spacing:0}
+.verdict p{margin:0;font-size:15px}
+.go{display:inline-flex;align-items:center;gap:8px;margin-top:16px;background:var(--sign-ink);color:var(--sign);text-decoration:none;font-weight:800;padding:11px 16px;border-radius:10px}
+.verdict.wait .go{color:var(--wait)}
+
+.route{margin:22px 4px 6px}
+.route svg{width:100%;height:auto;display:block;overflow:visible}
+.route text{font:600 12px Overpass,sans-serif;fill:var(--muted)}
+
+.status{font-size:13px;color:var(--muted);margin:14px 2px 10px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.status button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.status button:disabled{opacity:.5}
+
+.list{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.list:empty{display:none}
+.list li{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:13px 16px;border-top:1px solid var(--line);align-items:center}
+.list li:first-child{border-top:0}
+.list .name{font-weight:800;display:flex;align-items:center;gap:8px}
+.list .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.list .addr{grid-column:1;font-size:13px;color:var(--muted)}
+.list .p{grid-row:1/3;grid-column:2;text-align:right}
+.list .p b{display:block;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.list .p a{font-size:13px;font-weight:600;color:var(--sign)}
+
+details{margin-top:22px;font-size:14px}
+summary{cursor:pointer;color:var(--muted);font-weight:600}
+.settings{margin-top:10px;display:grid;gap:8px}
+.settings input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.settings .row{display:flex;gap:8px}
+.settings button{flex:1;padding:9px;border-radius:8px;border:0;background:var(--ink);color:var(--bg);font-weight:600;cursor:pointer}
+.settings button.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.settings p{margin:0;color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:no-preference){.verdict{transition:background .3s}}
+</style>
+</head>
+<body>
+<main>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="View">
+      <button data-mode="commute">Commute</button>
+      <button data-mode="near">Near me</button>
+    </div>
+    <div class="seg" id="carSeg" role="group" aria-label="Vehicle"></div>
+  </div>
+  <p class="auto" id="auto"></p>
+
+  <section class="verdict" id="verdict" aria-live="polite"></section>
+  <div class="route" id="route" aria-hidden="true"></div>
+
+  <div class="status">
+    <span id="status">Finding you…</span>
+    <button id="refresh" type="button" hidden>Refresh now</button>
+  </div>
+
+  <ul class="list" id="list"></ul>
+
+  <details id="pointsBox">
+    <summary>Kroger fuel points</summary>
+    <div class="settings">
+      <input id="points" type="number" inputmode="numeric" min="0" step="100" placeholder="Current points balance">
+      <div class="row">
+        <button id="savePoints" type="button">Save points</button>
+        <button id="clearPoints" type="button" class="ghost">Clear</button>
+      </div>
+      <p>100 points = 10¢/gal off, capped at $1.00/gal on the first 35 gallons. Applied to Kroger only. Update it whenever your balance changes.</p>
+    </div>
+  </details>
+
+  <details id="settingsBox">
+    <summary>Apify connection</summary>
+    <div class="settings">
+      <input id="token" type="password" autocomplete="off" placeholder="Paste your Apify API token">
+      <div class="row">
+        <button id="saveToken" type="button">Save token</button>
+        <button id="clearToken" type="button" class="ghost">Use sample prices</button>
+      </div>
+      <p>The token stays on this phone. Find it in Apify under Settings → API &amp; Integrations.</p>
+    </div>
+  </details>
+</main>
+
+<script>
+/* ============================================================
+   CONFIG — drop your Apify token in APIFY_TOKEN to hardcode it,
+   or leave it blank and paste it in the "Apify connection" panel.
+   ============================================================ */
+const CONFIG = {
+  APIFY_TOKEN: "",
+  ACTOR: "diopside~gasbuddy-prices",
+  CARS: [
+    { id:"a8",      label:"A8",      grade:"Premium", tankGal:21.9 },
+    { id:"envision", label:"Envision", grade:"Regular", tankGal:16 }
+  ],
+  KROGER_PTS_PER_DIME: 100,   // 100 points = $0.10/gal off
+  KROGER_MAX_OFF: 1.00,       // caps at $1.00/gal
+  KROGER_PTS_GAL_CAP: 35,     // discount applies to first 35 gal only
+  COSTCO_OPEN: 6, COSTCO_CLOSE: 21,  // rough gas hours, local; members-only
+  DETOUR_MPH: 30,             // assumed speed to turn detour miles into minutes
+  DETOUR_MIN_FLAG: 3,         // only mention a detour past this many minutes
+  SEARCH: ["Rochester, MI", "Rochester Hills, MI", "Troy, MI", "Madison Heights, MI", "Royal Oak, MI"],
+  WORK: { name: "Rochester", lat: 42.6806, lng: -83.1338 },
+  HOME: { name: "Madison Heights", lat: 42.4859, lng: -83.1052 },
+  COMMUTE_BRANDS: /kroger|costco/i, // commute stays Kroger + Costco; Near me shows every brand
+  WAIT_THRESHOLD: 0.05,             // $/gal — "wait" only if the far end is this much cheaper
+  MAX_PRICE_AGE_HOURS: 24,
+  CORRIDOR_MILES: 4,                // commute: how far off the line a station can sit
+  ENDPOINT_RADIUS_MILES: 3,         // within this of home or work = that end of the commute
+  NEAR_RADIUS_MILES: 12,            // Near me: search radius
+  NEAR_COST_PER_MILE: 0.03,         // Near me: $/gal penalty per mile when ranking
+  NEAR_RESCRAPE_MILES: 5,           // Near me: re-scrape after moving this far...
+  NEAR_RESCRAPE_MINUTES: 30,        // ...or after this long
+  STALE_AFTER_HOURS: 10
+};
+
+const SAMPLE = [
+  { name:"Kroger", brand:"Kroger", address:{line1:"4889 Rochester Rd", city:"Troy"}, latitude:42.5960, longitude:-83.1295, regularPrice:3.19, premiumPrice:3.89 },
+  { name:"Costco", brand:"Costco", address:{line1:"30550 Stephenson Hwy", city:"Madison Heights"}, latitude:42.5163, longitude:-83.1170, regularPrice:3.05, premiumPrice:3.59 },
+  { name:"Kroger", brand:"Kroger", address:{line1:"2222 E 12 Mile Rd", city:"Royal Oak"}, latitude:42.5029, longitude:-83.0968, regularPrice:3.15, premiumPrice:3.85 }
+];
+
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const CAR = () => CONFIG.CARS.find(c => c.id === state.carId) || CONFIG.CARS[0];
+const state = {
+  mode: "commute", manualMode: false,
+  trip: new Date().getHours() < 12 ? "am" : "pm",
+  carId: store.get("carId") || CONFIG.CARS[0].id,
+  get grade(){ return CAR().grade; },
+  here: null, locDenied: false, autoNote: "",
+  rows: null, fetchedAt: null, live: false, error: null
+};
+const token = () => CONFIG.APIFY_TOKEN || store.get("apifyToken") || "";
+const $ = id => document.getElementById(id);
+
+/* ---------- geometry ---------- */
+const mplng = lat => 69 * Math.cos(lat * Math.PI / 180);
+function miles(a, b){ return Math.hypot((a.lat-b.lat)*69, (a.lng-b.lng)*mplng((a.lat+b.lat)/2)); }
+function along(lat, lng){
+  const kx = mplng(CONFIG.HOME.lat);
+  const bx=(CONFIG.WORK.lng-CONFIG.HOME.lng)*kx, by=(CONFIG.WORK.lat-CONFIG.HOME.lat)*69;
+  const px=(lng-CONFIG.HOME.lng)*kx, py=(lat-CONFIG.HOME.lat)*69;
+  const t=(px*bx+py*by)/(bx*bx+by*by);
+  return { t, off: Math.hypot(px-t*bx, py-t*by) }; // t: 0 = home, 1 = Rochester
+}
+
+/* ---------- rows ---------- */
+const labelOf = r => [r.brand, r.name, ...(r.brands||[]).map(b => b.name)].join(" ");
+function priceFor(r, grade){
+  const flat = r[grade.toLowerCase() + "Price"];
+  if (typeof flat === "number" && flat > 0) return flat;
+  const p = r.prices && r.prices[grade];
+  const v = p && ((p.credit && p.credit.price) || (p.cash && p.cash.price));
+  return v > 0 ? v : null;
+}
+function station(r, grade){
+  const l = labelOf(r);
+  const brand = /costco/i.test(l) ? "Costco" : /kroger/i.test(l) ? "Kroger" : (r.brand || r.name || "Station");
+  return { brand, line1: r.address?.line1 || "", city: r.address?.city || "", lat: r.latitude, lng: r.longitude,
+    price: priceFor(r, grade), posted: r.pricesUpdatedAt || null };
+}
+function dedupe(rows){
+  const seen = new Set();
+  return rows.filter(r => { const id = r.stationId || (r.latitude + "," + r.longitude); if (seen.has(id)) return false; seen.add(id); return true; });
+}
+function commuteStations(rows, grade){
+  return dedupe(rows).filter(r => CONFIG.COMMUTE_BRANDS.test(labelOf(r)))
+    .map(r => { const s = station(r, grade); Object.assign(s, along(s.lat, s.lng)); return s; })
+    .filter(s => s.price && s.off <= CONFIG.CORRIDOR_MILES && s.t > -0.15 && s.t < 1.15)
+    .filter(s => !(s.brand === "Costco" && !costcoOpenNow()))
+    .map(s => { s.eff = effPrice(s); return s; })
+    .sort((a,b) => a.eff - b.eff);
+}
+function nearStations(rows, grade, here){
+  return dedupe(rows).map(r => { const s = station(r, grade); s.dist = miles(here, s); return s; })
+    .filter(s => s.price && s.dist <= CONFIG.NEAR_RADIUS_MILES)
+    .filter(s => !(s.brand === "Costco" && !costcoOpenNow()))
+    .map(s => { s.eff = effPrice(s); return s; })
+    .sort((a,b) => (a.eff + a.dist*CONFIG.NEAR_COST_PER_MILE) - (b.eff + b.dist*CONFIG.NEAR_COST_PER_MILE));
+}
+
+/* ---------- location decides the view ---------- */
+function locate(){
+  return new Promise(resolve => {
+    if (!navigator.geolocation) return resolve({ denied:true });
+    navigator.geolocation.getCurrentPosition(
+      p => resolve({ lat:p.coords.latitude, lng:p.coords.longitude }),
+      e => resolve({ denied: e.code === 1, failed:true }),
+      { enableHighAccuracy:false, timeout:10000, maximumAge:120000 });
+  });
+}
+function decide(){
+  state.autoNote = "";
+  if (!state.here){
+    if (!state.manualMode) state.mode = "commute";
+    state.trip = new Date().getHours() < 12 ? "am" : "pm";
+    state.autoNote = state.locDenied ? "Location is off — guessing your direction from the time of day." : "";
+    return;
+  }
+  const dHome = miles(state.here, CONFIG.HOME), dWork = miles(state.here, CONFIG.WORK);
+  const atHome = dHome <= CONFIG.ENDPOINT_RADIUS_MILES, atWork = dWork <= CONFIG.ENDPOINT_RADIUS_MILES;
+  const onCorridor = along(state.here.lat, state.here.lng).off <= CONFIG.CORRIDOR_MILES && dHome < 20 && dWork < 20;
+
+  // direction: whichever end you're closest to is where you're leaving from
+  state.trip = dHome < dWork ? "am" : "pm";
+
+  if (!state.manualMode) state.mode = (atHome || atWork || onCorridor) ? "commute" : "near";
+
+  if (state.mode === "commute"){
+    state.autoNote = atHome ? `You're near ${CONFIG.HOME.name} — showing the drive to ${CONFIG.WORK.name}.`
+      : atWork ? `You're near ${CONFIG.WORK.name} — showing the drive home.`
+      : `You're on your route — showing the drive ${state.trip === "am" ? "to " + CONFIG.WORK.name : "home"}.`;
+  } else {
+    state.autoNote = "You're away from your usual route — showing gas near you.";
+  }
+}
+
+/* ---------- Apify ---------- */
+async function apify(url, init){
+  const res = await fetch(url, init);
+  if (res.status === 401) throw new Error("Apify rejected the token. Check it under Apify connection.");
+  if (res.status === 404) throw new Error("No finished Apify run yet. Tap Refresh now.");
+  if (!res.ok) throw new Error(`Apify returned ${res.status}. Try again in a minute.`);
+  return res.json();
+}
+const lastRun = () => apify(`https://api.apify.com/v2/acts/${CONFIG.ACTOR}/runs/last/dataset/items?status=SUCCEEDED&clean=true&token=${encodeURIComponent(token())}`);
+const run = input => apify(`https://api.apify.com/v2/acts/${CONFIG.ACTOR}/run-sync-get-dataset-items?token=${encodeURIComponent(token())}`,
+  { method:"POST", headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify(Object.assign({ fuel: state.grade, maxPriceAgeHours: CONFIG.MAX_PRICE_AGE_HOURS, maxStationsPerSearch: 60 }, input)) });
+const newest = rows => { const ts = rows.map(r => Date.parse(r.scrapedAt || "")).filter(Boolean); return ts.length ? Math.max(...ts) : Date.now(); };
+
+function nearIsStale(){
+  const last = store.get("nearRun");
+  if (!last || !state.here) return true;
+  return miles(last, state.here) > CONFIG.NEAR_RESCRAPE_MILES || (Date.now() - last.at) / 60000 > CONFIG.NEAR_RESCRAPE_MINUTES;
+}
+
+async function load(force){
+  if (!token()){
+    Object.assign(state, { rows: SAMPLE, fetchedAt: null, live: false, error: null });
+    return render();
+  }
+  const btn = $("refresh"); btn.disabled = true;
+  try {
+    let rows, key;
+    if (state.mode === "near" && state.here){
+      key = "nearCache";
+      const cached = store.get(key);
+      if (!force && !nearIsStale() && cached) rows = cached.rows;
+      else {
+        $("status").textContent = "Pulling prices near you… (up to a minute)";
+        rows = await run({ lat: state.here.lat, lng: state.here.lng, maxStationsPerSearch: 80 });
+        store.set("nearRun", { lat: state.here.lat, lng: state.here.lng, at: Date.now() });
+      }
+    } else {
+      key = "commuteCache";
+      $("status").textContent = force ? "Pulling fresh commute prices… (up to a minute)" : "Checking latest prices…";
+      rows = force ? await run({ search: CONFIG.SEARCH }) : await lastRun();
+    }
+    Object.assign(state, { rows, fetchedAt: newest(rows), live: true, error: null });
+    store.set(key, { rows, fetchedAt: state.fetchedAt });
+  } catch (e) {
+    state.error = e.message || "Couldn't reach Apify.";
+  } finally { btn.disabled = false; render(); }
+}
+
+/* ---------- render ---------- */
+const money = n => "$" + n.toFixed(2);
+function trendOf(rows){
+  // GasBuddy areaTrends: look for a numeric change or a direction word across rows
+  for (const r of rows || []){
+    const t = r.areaTrends;
+    if (!t) continue;
+    const str = JSON.stringify(t).toLowerCase();
+    if (/rising|\bup\b|increase/.test(str)) return "up";
+    if (/falling|dropping|\bdown\b|decrease/.test(str)) return "down";
+  }
+  return null;
+}
+function fillLine(price){
+  const cost = price * CAR().tankGal;
+  return `About ${money(cost)} to fill the ${esc(CAR().label)}.`;
+}
+const isKroger = s => s.brand === "Kroger";
+function krogerPoints(){ const p = store.get("krogerPoints"); return typeof p === "number" && p > 0 ? p : 0; }
+function krogerOff(){
+  const dimes = Math.floor(krogerPoints() / CONFIG.KROGER_PTS_PER_DIME);
+  return Math.min(dimes * 0.10, CONFIG.KROGER_MAX_OFF);
+}
+// effective per-gal price used for ranking/verdict (Kroger points applied)
+function effPrice(s){
+  if (!isKroger(s) || !krogerOff()) return s.price;
+  const gal = CAR().tankGal, capGal = Math.min(gal, CONFIG.KROGER_PTS_GAL_CAP);
+  const saved = krogerOff() * capGal;          // dollars off the whole fill
+  return Math.max(0, (s.price * gal - saved) / gal); // blended $/gal across the tank
+}
+function costcoOpenNow(){
+  const h = new Date().getHours();
+  return h >= CONFIG.COSTCO_OPEN && h < CONFIG.COSTCO_CLOSE;
+}
+function detourText(offMiles){
+  const mins = Math.round((offMiles * 2 / CONFIG.DETOUR_MPH) * 60); // out and back
+  return mins >= CONFIG.DETOUR_MIN_FLAG ? `about ${mins} min out of your way` : "right on your way";
+}
+function ago(ms){ const m = Math.round((Date.now()-ms)/60000); if (m < 60) return `${m} min ago`; const h = Math.round(m/60); return h < 24 ? `${h} hr ago` : `${Math.round(h/24)} days ago`; }
+const maps = s => `https://maps.apple.com/?daddr=${s.lat},${s.lng}&dirflg=d`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const col = b => b === "Costco" ? "var(--costco)" : b === "Kroger" ? "var(--kroger)" : "var(--other)";
+const row = (s, meta) => { const show = (typeof s.eff === "number") ? s.eff : s.price; return `<li>
+  <span class="name"><span class="dot" style="background:${col(s.brand)}"></span>${esc(s.brand)} · ${esc(s.city)}</span>
+  <span class="addr">${meta}${s.posted ? ` · posted ${ago(Date.parse(s.posted))}` : ""}</span>
+  <span class="p"><b>${money(show)}</b><a href="${maps(s)}">Directions</a></span></li>`; };
+
+function buildCarSeg(){
+  const seg = $("carSeg");
+  if (seg.childElementCount !== CONFIG.CARS.length){
+    seg.innerHTML = CONFIG.CARS.map(c => `<button data-car="${c.id}">${esc(c.label)}</button>`).join("");
+    seg.querySelectorAll("[data-car]").forEach(b => b.onclick = () => {
+      state.carId = b.dataset.car; store.set("carId", state.carId); render();
+    });
+  }
+  seg.querySelectorAll("[data-car]").forEach(b => b.setAttribute("aria-pressed", b.dataset.car === state.carId));
+}
+function render(){
+  document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === state.mode));
+  buildCarSeg();
+  $("auto").textContent = state.autoNote;
+  state.mode === "near" ? renderNear() : renderCommute();
+
+  const st = $("status");
+  if (state.error) st.textContent = state.error;
+  else if (!state.live) st.textContent = "Sample prices. Add your Apify token below to go live.";
+  else { const hrs = (Date.now() - state.fetchedAt) / 3.6e6;
+    st.textContent = `Updated ${ago(state.fetchedAt)}${state.mode === "commute" && hrs > CONFIG.STALE_AFTER_HOURS ? " — check your Apify schedule" : ""}`; }
+  $("refresh").hidden = !token();
+}
+
+function renderCommute(){
+  const stations = commuteStations(state.rows || [], state.grade);
+  const toWork = state.trip === "am";
+  const start = toWork ? CONFIG.HOME : CONFIG.WORK, end = toWork ? CONFIG.WORK : CONFIG.HOME;
+  const nearStart = s => toWork ? s.t < 0.5 : s.t >= 0.5;
+  const nowBest = stations.find(nearStart), laterBest = stations.find(s => !nearStart(s));
+  const v = $("verdict");
+
+  if (!stations.length){
+    v.className = "verdict empty";
+    v.innerHTML = `<p class="trip">${toWork ? "Heading to " + CONFIG.WORK.name : "Heading home"}</p>
+      <h1>No ${state.grade.toLowerCase()} prices posted on your route</h1>
+      <p>No Kroger or Costco along the way has a recent price. Try again after the next update.</p>`;
+  } else {
+    let pick, wait = false, why;
+    if (nowBest && laterBest && laterBest.eff <= nowBest.eff - CONFIG.WAIT_THRESHOLD){
+      pick = laterBest; wait = true;
+      why = `${pick.brand} in ${pick.city} is ${Math.round((nowBest.eff - pick.eff)*100)}¢ less than anything near ${start.name}.`;
+    } else if (nowBest){
+      pick = nowBest;
+      why = laterBest ? `Nothing closer to ${end.name} beats it by ${Math.round(CONFIG.WAIT_THRESHOLD*100)}¢ or more.` : "It's the only option posted on this stretch.";
+    } else { pick = laterBest; wait = true; why = `Nothing near ${start.name} has a recent price.`; }
+    const tr = trendOf(state.rows);
+    const trTxt = tr === "up" ? " Prices are rising — fill sooner." : tr === "down" ? " Prices are easing off." : "";
+    const ptsNote = (isKroger(pick) && krogerOff()) ? ` <span style="opacity:.85">(after ${krogerPoints()} pts: ${money(krogerOff())}/gal off)</span>` : "";
+    v.className = "verdict" + (wait ? " wait" : "");
+    v.innerHTML = `<p class="trip">${toWork ? "Heading to " + CONFIG.WORK.name : "Heading home"} · ${esc(CAR().label)} · ${state.grade}${tr ? " " + (tr === "up" ? "\u2191" : "\u2193") : ""}</p>
+      <h1>${wait ? "Wait for" : "Fill up at"} ${esc(pick.brand)} in ${esc(pick.city)}</h1>
+      <div class="price">${money(pick.eff)}<small>/gal</small></div>
+      <p>${esc(why)}${trTxt} It's ${detourText(pick.off)}.${ptsNote}</p>
+      <p style="margin-top:6px;opacity:.85">${fillLine(pick.eff)}</p>
+      <a class="go" href="${maps(pick)}">Get directions</a>`;
+  }
+
+  const W = 440, x = t => Math.max(20, Math.min(W-20, 20 + (toWork ? t : 1-t) * (W-40)));
+  const dots = stations.map(s => `<circle cx="${x(s.t)}" cy="22" r="7" fill="${col(s.brand)}" stroke="var(--bg)" stroke-width="2"/>`).join("");
+  const you = state.here && along(state.here.lat, state.here.lng).off <= CONFIG.CORRIDOR_MILES
+    ? `<circle cx="${x(along(state.here.lat, state.here.lng).t)}" cy="22" r="5" fill="var(--ink)"/>` : "";
+  $("route").hidden = false;
+  $("route").innerHTML = `<svg viewBox="0 0 ${W} 54">
+    <line x1="20" y1="22" x2="${W-20}" y2="22" stroke="var(--line)" stroke-width="4" stroke-linecap="round"/>
+    ${dots}${you}<text x="20" y="50">${start.name}</text><text x="${W-20}" y="50" text-anchor="end">${end.name}</text></svg>`;
+  $("list").innerHTML = stations.map(s => row(s, esc(s.line1))).join("");
+}
+
+function renderNear(){
+  $("route").hidden = true;
+  const v = $("verdict");
+  if (!state.here){
+    v.className = "verdict empty";
+    v.innerHTML = `<p class="trip">Near me</p><h1>Turn on location to find gas near you</h1>
+      <p>In iPhone Settings → Privacy &amp; Security → Location Services, allow Safari Websites, then reopen Gas Run.</p>`;
+    $("list").innerHTML = ""; return;
+  }
+  const stations = nearStations(state.rows || [], state.grade, state.here);
+  if (!stations.length){
+    v.className = "verdict empty";
+    v.innerHTML = `<p class="trip">Near me · ${state.grade}</p>
+      <h1>No ${state.grade.toLowerCase()} prices within ${CONFIG.NEAR_RADIUS_MILES} miles</h1>
+      <p>${token() ? "Tap Refresh now to scrape where you are." : "Add your Apify token to pull live prices wherever you are."}</p>`;
+    $("list").innerHTML = ""; return;
+  }
+  const pick = stations[0];
+  const tr = trendOf(state.rows);
+  const ptsNote = (isKroger(pick) && krogerOff()) ? ` After ${krogerPoints()} pts: ${money(krogerOff())}/gal off.` : "";
+  v.className = "verdict";
+  v.innerHTML = `<p class="trip">Best near you · ${esc(CAR().label)} · ${state.grade} · all brands${tr ? " " + (tr === "up" ? "\u2191" : "\u2193") : ""}</p>
+    <h1>${esc(pick.brand)} in ${esc(pick.city)}</h1>
+    <div class="price">${money(pick.eff)}<small>/gal</small></div>
+    <p>${pick.dist.toFixed(1)} miles away.${ptsNote}</p>
+    <p style="margin-top:6px;opacity:.85">${fillLine(pick.eff)}</p>
+    <a class="go" href="${maps(pick)}">Get directions</a>`;
+  $("list").innerHTML = stations.slice(0, 15).map(s => row(s, `${s.dist.toFixed(1)} mi · ${esc(s.line1)}`)).join("");
+}
+
+/* ---------- wire up ---------- */
+document.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => {
+  state.mode = b.dataset.mode; state.manualMode = true; decide(); load(false);
+});
+$("refresh").onclick = () => load(true);
+$("savePoints").onclick = () => { const n = parseInt($("points").value, 10); store.set("krogerPoints", isNaN(n) ? 0 : Math.max(0, n)); $("pointsBox").open = false; render(); };
+$("clearPoints").onclick = () => { store.set("krogerPoints", 0); $("points").value = ""; render(); };
+if (krogerPoints()) $("points").value = krogerPoints();
+$("saveToken").onclick = () => { const t = $("token").value.trim(); if (!t) return; store.set("apifyToken", t); $("token").value = ""; $("settingsBox").open = false; load(false); };
+$("clearToken").onclick = () => { store.set("apifyToken", ""); ["commuteCache","nearCache","nearRun"].forEach(k => localStorage.removeItem(k)); load(false); };
+
+async function start(){
+  const loc = await locate();
+  state.here = loc.failed || loc.denied ? null : loc;
+  state.locDenied = !!loc.denied;
+  state.manualMode = false;   // every open re-reads where you are
+  decide();
+  await load(false);
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) start(); });
+
+// paint cached data instantly, then locate and refresh
+const c = token() && store.get("commuteCache");
+if (c){ Object.assign(state, { rows: c.rows, fetchedAt: c.fetchedAt, live: true }); decide(); render(); }
+start();
+</script>
+</body>
+</html>
